@@ -1,15 +1,24 @@
 #!/bin/bash
 
-# This script installs the tools needed by run.sh.
-# It's run by the GitHub Action before the main script.
+# This script installs the pre-compiled binary for naabu.
+# This is much faster and avoids the C-dependency error.
 
-# You mentioned `apt install naabu` for your Debian system.
-# In the GitHub runner, it's often more reliable to install
-# Go-based tools directly using 'go install'.
+echo "Downloading latest naabu binary..."
+# We download the latest linux_amd64.zip file from the official releases
+curl -L -o naabu.zip "https://github.com/projectdiscovery/naabu/releases/latest/download/naabu_linux_amd64.zip"
 
-echo "Installing naabu..."
-go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+echo "Installing binary..."
+# Unzip the binary
+unzip naabu.zip
+rm naabu.zip
 
-# Add any other installations here, for example:
+# Move the 'naabu' binary to a directory that is already in the system's PATH
+# This makes it executable from anywhere
+sudo mv naabu /usr/local/bin/
+
+echo "Naabu installed to /usr/local/bin/naabu"
+
+# You can add other apt-get installations here if needed
 # sudo apt-get update
 # sudo apt-get install -y nmap
+
