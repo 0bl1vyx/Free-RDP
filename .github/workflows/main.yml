@@ -1,0 +1,59 @@
+# This is the main GitHub Action workflow file.
+# It defines what triggers the action and what steps it runs.
+name: Run Commands
+
+on:
+  # Triggers the workflow on push events to the main branch
+  push:
+    branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checks out your repository's code so the runner can access it
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # 2. Set up the Go environment (needed to install naabu)
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22' # Use a recent Go version
+
+      # 3. Create the results directory
+      - name: Create results directory
+        run: mkdir -p results
+
+      # 4. Make scripts executable
+      - name: Make scripts executable
+        run: |
+          chmod +x setup.sh
+          chmod +x run.sh
+          
+      # 5. Run the setup script to install tools
+      # We pipe to /dev/null to keep logs clean
+      - name: Run setup.sh
+        run: |
+          echo "Installing tools..."
+          bash ./setup.sh > /dev/null
+          echo "Tools installed."
+
+      # 6. Run the main command script
+      - name: Run run.sh
+        run: |
+          echo "Running commands..."
+          bash ./run.sh
+          echo "Commands finished."
+
+      # 7. Automatically commit any changes in the 'results' directory
+      - name: Commit results
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update: Automated command results"
+          file_pattern: "results/*.*" # Only commit files in the results/ directory
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions-bot@github.com"
